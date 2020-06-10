@@ -13,7 +13,7 @@ class sensor:
         self.humidity = 0
         self.temperature = 0
     def getFreshHumidity(self):
-        self.humidity, self.temperature = Adafruit_DHT.read_retry(11, self.pin)
+        self.humidity, self.temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, 11, self.pin)
         return self.humidity
 
     def getFreshTemperature(self):
@@ -21,7 +21,7 @@ class sensor:
         return self.temperature
 
     def getFreshData(self):
-        self.humidity, self.temperature = Adafruit_DHT.read_retry(11, self.pin)
+        self.humidity, self.temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, 11, self.pin)
         return self.humidity, self.temperature
     
     def getCachedData(self):
@@ -76,17 +76,20 @@ class fan:
 #     sleep(5)
 
 def main():
-    fan1 = fan(23)
-    fan2 = fan(24)
-    print(fan2.pin, fan1.pin)
-    fan2.on()
-    fan1.on()
-    sleep(5)
-    fan2.off()
-    sleep(2)
-    fan1.off()
-    sleep(5)
-    GPIO.cleanup()
+    # fan1 = fan(23)
+    # fan2 = fan(24)
+    # print(fan2.pin, fan1.pin)
+    # fan2.on()
+    # fan1.on()
+    # sleep(5)
+    # fan2.off()
+    # sleep(2)
+    # fan1.off()
+    # sleep(5)
+    # GPIO.cleanup()
+    sensor1 = sensor(18)
+    print(sensor1.getFreshHumidity)
+    print(sensor1.getCachedTemperature)
 
 
 
