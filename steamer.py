@@ -32,17 +32,22 @@ class sensor:
 
     def getCachedTemperature(self):
         return self.temperature
-
+GPIO.setmode(GPIO.BCM)
 class fan:
     def __init__(self, pin):
         self.pin = pin
-        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.OUT)
     def on(self):
-        print(self.pin)
-        GPIO.output(self.pin, GPIO.HIGH)
+        # GPIO.output(self.pin, GPIO.HIGH)
+        GPIO.output(self.pin , True) 
+        print("on: ", self.pin)
     def off(self):
-        GPIO.output(self.pin, GPIO.LOW)
+        print("off: ", self.pin)
+        # GPIO.output(self.pin , False)
+        GPIO.cleanup(self.pin)
+        # GPIO.output(self.pin, GPIO.LOW)
+    def cleanup(self):
+        GPIO.cleanup()
 
 # GPIO.setmode(GPIO.BCM)
 # # Set relay pins as output
@@ -71,13 +76,16 @@ class fan:
 #     sleep(5)
 
 def main():
-    fan1 = fan(17)
-    print(fan1.pin)
-    fan2 = fan(18)
-    print(fan2.pin)
-    fan_top = fan(27)
-    print(fan_top.pin)
-
+    fan1 = fan(23)
+    fan2 = fan(24)
+    print(fan2.pin, fan1.pin)
+    fan2.on()
+    fan1.on()
+    sleep(5)
+    fan2.off()
+    sleep(2)
+    fan1.off()
+    sleep(5)
     GPIO.cleanup()
 
 
