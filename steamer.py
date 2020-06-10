@@ -80,10 +80,10 @@ class powerPlug:
             plug = dev
         self.dev = plug
         logging.info("init power plug: %s", self.dev.model)
-    def turn_on():
+    def turn_on(self):
         self.dev.turn_on()
         logging.info("turning plug: %s ON", self.dev.model)
-    def turn_on():
+    def turn_off(self):
         self.dev.turn_off()
         logging.info("turning plug: %s OFF", self.dev.model)
     
@@ -101,8 +101,8 @@ def main():
     start_time = time.time()
     steam_time = 300
     steam_elapsed_time = time.time() - start_main_time # diff of steam time
-    while steam_elapsed_time > 10:
-        while sensor.getCachedHumidity() < 90:
+    while steam_elapsed_time < steam_time:
+        while sensor1.getFreshHumidity() < 90:
             plug.turn_on() # turned steamer on
             sleep(10)
 
@@ -110,7 +110,8 @@ def main():
             if elapsed_time > steam_time:
                 logging.info("Finished iterating in: %s", elapsed_time)
                 break
-
+        plug.turn_off()
+        sleep(2)
         steam_elapsed_time = time.time() - start_main_time # diff of steam time
 
     
