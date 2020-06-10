@@ -7,6 +7,7 @@ import logging
 import atexit
 import optparse
 import sys
+import time
 
 
 FORMAT = "%(asctime)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s"
@@ -35,6 +36,7 @@ class sensor:
         self.pin = pin
         self.humidity = 0
         self.temperature = 0
+        logging.info("init sensor: %s", self.pin)
     def getFreshHumidity(self):
         self.humidity, self.temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, self.pin)
         return self.humidity
@@ -61,16 +63,15 @@ class fan:
     def __init__(self, pin):
         self.pin = pin
         GPIO.setup(self.pin, GPIO.OUT)
+        logging.info("init relay: %s", self.pin)
     def on(self):
-        # GPIO.output(self.pin, GPIO.HIGH)
         GPIO.output(self.pin , True) 
-        print("on: ", self.pin)
+        logging.info("turning relay on: %s", self.pin)
     def off(self):
-        print("off: ", self.pin)
-        # GPIO.output(self.pin , False)
         GPIO.cleanup(self.pin)
-        # GPIO.output(self.pin, GPIO.LOW)
+        logging.info("turning relay off: %s", self.pin)
     def cleanup(self):
+        logging.info("cleanup relay: %s", self.pin)
         GPIO.cleanup()
 
 class powerPlug:
@@ -78,15 +79,49 @@ class powerPlug:
         for dev in Discover.discover().values():
             plug = dev
         self.dev = plug
+        logging.info("init power plug: %s", self.dev.model)
+    def turn_on():
+        self.dev.turn_on()
+        logging.info("turning plug: %s ON", self.dev.model)
+    def turn_on():
+        self.dev.turn_off()
+        logging.info("turning plug: %s OFF", self.dev.model)
+    
 
 def main():
     sensor1 = sensor(18)
-    logging.info("hum: %s", sensor1.getFreshHumidity())
-    logging.info("temp: %s", sensor1.getCachedTemperature())
+    fan_top = fan(1)
+    fan_inside = fan(2)
+    plug = powerPlug()
 
-    p = powerPlug()
-    logging.info("dev is on: %s", p.dev.is_on)
-    logging.info("dev is off: %s", p.dev.is_off)
+    # plug.turn_on() # turned steamer on
+    fan_inside.on() # turned fan inside on
+
+    start_main_time = time.time()
+    start_time = time.time()
+    steam_time = 300
+    steam_elapsed_time = time.time() - start_main_time # diff of steam time
+    while steam_elapsed_time > 10:
+        while sensor.getCachedHumidity() < 90:
+            plug.turn_on() # turned steamer on
+            sleep(10)
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time > steam_time:
+                logging.info("Finished iterating in: %s", elapsed_time)
+                break
+
+        steam_elapsed_time = time.time() - start_main_time # diff of steam time
+
+    
+
+
+    # logging.info("hum: %s", sensor1.getFreshHumidity())
+    # logging.info("temp: %s", sensor1.getCachedTemperature())
+
+    # p = powerPlug()
+    # logging.info("dev is on: %s", p.dev.is_on)
+    # logging.info("dev is off: %s", p.dev.is_off)
 
 
 
