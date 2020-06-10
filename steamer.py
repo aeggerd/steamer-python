@@ -2,10 +2,33 @@ import RPi.GPIO as GPIO
 from time import sleep
 import sys
 import Adafruit_DHT
+from pyHS100 import Discover
+import logging
+import atexit
+import optparse
+import sys
 
 
-# GPIO.cleanup()
-# The script as below using BCM GPIO 00..nn numbers
+FORMAT = "%(asctime)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s"
+logging.basicConfig(level=logging.INFO, format=FORMAT)
+
+
+def onexit():
+    GPIO.setwarnings(False)
+    GPIO.cleanup()
+    logging.info("shutting down gracefully")
+
+atexit.register(onexit)
+
+# parser = optparse.OptionParser()
+# parser.add_option('-q', '--query',
+#     action="store", dest="query",
+#     help="query string", default="spam")
+
+# options, args = parser.parse_args()
+# print(args.query)
+
+
 
 class sensor:
     def __init__(self, pin):
@@ -13,17 +36,11 @@ class sensor:
         self.humidity = 0
         self.temperature = 0
     def getFreshHumidity(self):
-        # humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, self.pin)
-        # self.humidity = humidity
-        # self.temperature = temperature
         self.humidity, self.temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, self.pin)
         return self.humidity
 
     def getFreshTemperature(self):
         self.humidity, self.temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, self.pin)
-        # humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, self.pin)
-        # self.humidity = humidity
-        # self.temperature = temperature
         return self.temperature
 
     def getFreshData(self):
@@ -56,47 +73,20 @@ class fan:
     def cleanup(self):
         GPIO.cleanup()
 
-# GPIO.setmode(GPIO.BCM)
-# # Set relay pins as output
-# GPIO.setup(fan1, GPIO.OUT)
-# GPIO.setup(fan2, GPIO.OUT)
-# GPIO.setup(fan_top, GPIO.OUT)
-# GPIO.cleanup()
-# print("all out")
-
-# while (True):
-
-#     # Turn all relays ON
-#     GPIO.output(fan1, GPIO.HIGH)
-#     GPIO.output(fan2, GPIO.HIGH)
-#     GPIO.output(fan_top, GPIO.HIGH)
-#     print("all high")
-#     # Sleep for 5 seconds
-#     sleep(5) 
-#     # Turn all relays OFF
-#     GPIO.output(18, GPIO.LOW)
-#     GPIO.output(23, GPIO.LOW)
-#     GPIO.output(24, GPIO.LOW)
-#     GPIO.output(25, GPIO.LOW)
-#     print("all low")
-#     # Sleep for 5 seconds
-#     sleep(5)
+class powerPlug:
+    def __init__(self):
+        for dev in Discover.discover().values():
+            plug = dev
+        self.dev = plug
 
 def main():
-    # fan1 = fan(23)
-    # fan2 = fan(24)
-    # print(fan2.pin, fan1.pin)
-    # fan2.on()
-    # fan1.on()
-    # sleep(5)
-    # fan2.off()
-    # sleep(2)
-    # fan1.off()
-    # sleep(5)
-    # GPIO.cleanup()
     sensor1 = sensor(18)
-    print("hum:", sensor1.getFreshHumidity())
-    print("temp:", sensor1.getCachedTemperature())
+    logging.info("hum: %s", sensor1.getFreshHumidity())
+    logging.info("temp: %s", sensor1.getCachedTemperature())
+
+    p = powerPlug()
+    logging.info("dev is on: %s", p.dev.is_on)
+    logging.info("dev is off: %s", p.dev.is_off)
 
 
 
