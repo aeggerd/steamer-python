@@ -62,10 +62,11 @@ GPIO.setmode(GPIO.BCM)
 class fan:
     def __init__(self, pin):
         self.pin = pin
-        GPIO.setup(self.pin, GPIO.OUT)
+        # GPIO.setup(self.pin, GPIO.OUT)
         logging.info("init relay: %s", self.pin)
     def on(self):
-        GPIO.output(self.pin , True) 
+        GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.output(self.pin , True)
         logging.info("turning relay on: %s", self.pin)
     def off(self):
         GPIO.cleanup(self.pin)
@@ -79,6 +80,8 @@ class powerPlug:
         for dev in Discover.discover().values():
             plug = dev
         self.dev = plug
+        if plug.hw_info == "":
+            logging.exception("could not init powerPlug")
         logging.info("init power plug: %s", self.dev.model)
     def turn_on(self):
         self.dev.turn_on()
@@ -90,19 +93,45 @@ class powerPlug:
 
 def main():
     sensor1 = sensor(18)
-    fan_top = fan(1)
-    fan_inside = fan(2)
+    fan_top = fan(24)
+    fan_inside = fan(23)
     plug = powerPlug()
 
-    # plug.turn_on() # turned steamer on
-    fan_inside.on() # turned fan inside on
+    # logging.info("turn all on")
+    # fan_inside.on() # turned fan inside on
+    # fan_top.on()
+    # plug.dev.turn_on()
+
+    # time.sleep(10)
+
+    # logging.info("turn all off")
+    # plug.dev.turn_off()
+    # fan_inside.off()
+    # fan_top.off()
+
+    # time.sleep(10)
+
+
+    # logging.info("turn all on")
+    # fan_inside.on() # turned fan inside on
+    # fan_top.on()
+    # plug.dev.turn_on()
+
+    # time.sleep(10)
+
+    # logging.info("turn all off")
+    # plug.dev.turn_off()
+    # fan_inside.off()
+    # fan_top.off()
+
+    # exit(0)
 
     start_main_time = time.time()
     start_time = time.time()
     steam_time = 300
     steam_elapsed_time = time.time() - start_main_time # diff of steam time
     while steam_elapsed_time < steam_time:
-        while sensor1.getFreshHumidity() < 90:
+        while sensor1.getFreshHumidity() < 85:
             plug.turn_on() # turned steamer on
             sleep(10)
 
